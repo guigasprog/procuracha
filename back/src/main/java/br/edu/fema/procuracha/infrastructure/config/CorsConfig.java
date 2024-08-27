@@ -7,6 +7,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class CorsConfig implements WebMvcConfigurer {
 
+    // PARA LINKAR COM O FRONT-END
+
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/*")
