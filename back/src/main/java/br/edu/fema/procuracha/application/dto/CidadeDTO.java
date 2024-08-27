@@ -4,6 +4,7 @@ import br.edu.fema.procuracha.domain.entity.CidadeEntity;
 import lombok.Getter;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
