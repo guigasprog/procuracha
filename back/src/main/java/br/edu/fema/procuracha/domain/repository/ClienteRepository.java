@@ -4,4 +4,7 @@ import br.edu.fema.procuracha.domain.entity.ClienteEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ClienteRepository  extends JpaRepository<ClienteEntity, Long> {
+
+    ClienteEntity findByEmailAndSenha(String email, String senha);
+
 }
