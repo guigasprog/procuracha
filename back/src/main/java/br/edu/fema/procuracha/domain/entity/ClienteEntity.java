@@ -20,6 +20,12 @@ public class ClienteEntity {
     @Column(name = "cpf",nullable = false, length = 15)
     private String cpf;
 
+    @Column(name = "email",nullable = false, length = 250)
+    private String email;
+
+    @Column(name = "senha",nullable = false, length = 250)
+    private String senha;
+
     @Column(name = "tel_cel",nullable = false, length = 15)
     private String tel_cel;
 
