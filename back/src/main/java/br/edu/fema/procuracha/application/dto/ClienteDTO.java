@@ -13,6 +13,8 @@ public class ClienteDTO {
 
     private String cpf;
 
+    private String email;
+
     private String tel_cel;
 
     private CidadeDTO cidade;
@@ -21,6 +23,7 @@ public class ClienteDTO {
         this.id = clienteEntity.getId();
         this.nome = clienteEntity.getNome();
         this.cpf = clienteEntity.getCpf();
+        this.email = clienteEntity.getEmail();
         this.tel_cel = clienteEntity.getTel_cel();
         this.cidade = new CidadeDTO(clienteEntity.getCidadeEntity());
     }
