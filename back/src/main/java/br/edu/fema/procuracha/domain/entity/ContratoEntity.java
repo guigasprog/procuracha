@@ -26,11 +26,11 @@ public class ContratoEntity {
     @Column(name = "problema",nullable = false)
     private String descricao;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "cliente_id")
     private ClienteEntity clienteEntity;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "profissional_id")
     private ProfissionalEntity profissionalEntity;
 
