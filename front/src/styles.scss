@@ -1,1 +1,88 @@
 /* You can add global styles to this file, and also import other style files */
+
+@import url("https://fonts.googleapis.com/css2?family=League+Spartan:wght@100..900&display=swap");
+
+@import url("https://fonts.googleapis.com/css2?family=Sanchez:ital@0;1&display=swap");
+
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+*::-webkit-scrollbar {
+  width: 10px; /* width of the entire scrollbar */
+}
+
+*::-webkit-scrollbar-track {
+  background: #0000009c;
+  border-radius: 30px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #ffffff;
+  border-radius: 30px;
+  border: 2px solid #0000009c;
+}
+
+h1,
+h2,
+h3 {
+  font-family: "League Spartan", sans-serif;
+  color: #ffffff;
+}
+
+h4,
+h5,
+h6 {
+  font-family: "Sanchez", serif;
+  color: #ffffff;
+}
+
+.title {
+  font-size: 43px;
+}
+
+.sub-title {
+  font-size: 15px;
+  font-weight: 300;
+}
+
+.bg {
+  width: 100vw;
+  height: 100vh;
+  background-color: #141414;
+  z-index: 2;
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+input {
+  width: 240px;
+  height: 2rem;
+  border: 2px solid #000000;
+  border-radius: 30px;
+  margin-top: 10px;
+  padding-left: 15px;
+  color: #ffffff;
+  font-size: 13px;
+  font-family: "Sanchez", serif;
+  background-color: transparent;
+}
+
+button {
+  width: 180px;
+  height: 3.8rem;
+  padding: 16px;
+  border: none;
+  border-radius: 15px;
+  background-color: #9d9d9d;
+  color: #ffffff;
+  font-size: 28px;
+  font-weight: 700;
+  font-family: "League Spartan", sans-serif;
+}
