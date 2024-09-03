@@ -25,12 +25,21 @@ import { Cliente } from '../../shared/models/cliente.model';
           <h3 style="font-size: 23px; margin: 0 0 3px 0; text-wrap: wrap;">
             {{ user.nome }}
           </h3>
-          <h4
-            (click)="perfil(user.cpf)"
-            style="font-weight: 500; font-size: 13px; margin: 0 0 0 0; cursor: pointer"
-          >
-            Perfil
-          </h4>
+          <div class="opcoes center" style="width: 100%; gap: 20px; justify-content: start">
+            <h4
+              (click)="perfil(user.cpf)"
+              style="font-weight: 500; font-size: 13px; margin: 0 0 0 0; cursor: pointer"
+            >
+              Perfil
+            </h4>
+            <h4
+              (click)="limparToken()"
+              style="font-weight: 500; font-size: 13px; margin: 0 0 0 0; cursor: pointer"
+            >
+              Logout
+            </h4>
+          </div>
+
         </div>
       </div>
     </header>
@@ -206,30 +215,33 @@ export class MenuComponent implements OnInit {
   constructor(private router: Router) {}
 
   ngOnInit(): void {
-    this.rawProfissionais = JSON.parse(localStorage.getItem('profissionais')!);
-    console.log(this.rawProfissionais);
-    this.profissionais = this.rawProfissionais;
-    this.user = JSON.parse(localStorage.getItem('token')!);
-    this.profissionalMaisRelevante = this.rawProfissionais
-      .map((prof) => ({
-        ...prof,
-        totalFeedbacks: prof.feedbacksProfissional.length,
-        mediaFeedback: prof.mediaFeedback || 0,
-      }))
-      .reduce((maisRelevante, atual) => {
-        if (!maisRelevante) {
-          return atual;
-        }
+    if(localStorage.getItem('profissionais')) {
+      this.rawProfissionais = JSON.parse(localStorage.getItem('profissionais')!);
+      console.log(this.rawProfissionais);
+      this.profissionais = this.rawProfissionais;
+      this.user = JSON.parse(localStorage.getItem('token')!);
+      this.profissionalMaisRelevante = this.rawProfissionais
+        .map((prof) => ({
+          ...prof,
+          totalFeedbacks: prof.feedbacksProfissional.length,
+          mediaFeedback: prof.mediaFeedback || 0,
+        }))
+        .reduce((maisRelevante, atual) => {
+          if (!maisRelevante) {
+            return atual;
+          }
 
-        if (
-          atual.totalFeedbacks > maisRelevante.totalFeedbacks ||
-          (atual.totalFeedbacks === maisRelevante.totalFeedbacks &&
-            atual.mediaFeedback > maisRelevante.mediaFeedback)
-        ) {
-          return atual;
-        }
-        return maisRelevante;
-      }, null as any);
+          if (
+            atual.totalFeedbacks > maisRelevante.totalFeedbacks ||
+            (atual.totalFeedbacks === maisRelevante.totalFeedbacks &&
+              atual.mediaFeedback > maisRelevante.mediaFeedback)
+          ) {
+            return atual;
+          }
+          return maisRelevante;
+        }, null as any);
+    } else
+    this.router.navigate(['/login']);
   }
 
   aplicarFiltro() {
@@ -276,5 +288,10 @@ export class MenuComponent implements OnInit {
 
   perfil(cpf: string) {
     this.router.navigate(['/user', cpf]);
+  }
+
+  limparToken() {
+    localStorage.clear()
+    this.ngOnInit()
   }
 }

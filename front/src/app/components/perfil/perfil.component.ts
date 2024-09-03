@@ -282,12 +282,14 @@ export class PerfilComponent implements OnInit {
   postService(formServico?: string) {
     if (formServico != undefined) {
       this.profissionalForm.clienteForm = new Cliente();
-      this.profissionalForm.clienteForm = this.user;
+      this.profissionalForm.clienteForm.cpf = this.user.cpf;
       this.profissionalForm.servicoForm = new Servico();
       this.profissionalForm.servicoForm.descricao = formServico;
       this.service
         .postProfissional(this.profissionalForm)
-        .subscribe((success) => console.log(success));
+        .subscribe((success) =>
+            this.router.navigate(['/user', this.user.cpf])
+        );
     } else {
       this.formServico = '';
       this.forms = !this.forms;
