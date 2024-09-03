@@ -1,6 +1,7 @@
 package br.edu.fema.procuracha.domain.entity;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,10 +18,10 @@ public class ClienteEntity {
     @Column(name = "nome",nullable = false, length = 80)
     private String nome;
 
-    @Column(name = "cpf",nullable = false, length = 15)
+    @Column(name = "cpf",nullable = false, length = 15, unique = true)
     private String cpf;
 
-    @Column(name = "email",nullable = false, length = 250)
+    @Column(name = "email",nullable = false, length = 250, unique = true)
     private String email;
 
     @Column(name = "senha",nullable = false, length = 250)
@@ -29,7 +30,7 @@ public class ClienteEntity {
     @Column(name = "tel_cel",nullable = false, length = 15)
     private String tel_cel;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "cidade_id")
     private CidadeEntity cidadeEntity;
 

@@ -1,14 +1,23 @@
 package br.edu.fema.procuracha.application.controller;
 
 import br.edu.fema.procuracha.application.dto.ProfissionalDTO;
+import br.edu.fema.procuracha.application.form.ClienteForProfissionalForm;
 import br.edu.fema.procuracha.application.form.ClienteForm;
+import br.edu.fema.procuracha.application.form.ProfissionalForm;
+import br.edu.fema.procuracha.application.form.ServicoForm;
+import br.edu.fema.procuracha.domain.entity.CidadeEntity;
+import br.edu.fema.procuracha.domain.entity.ClienteEntity;
 import br.edu.fema.procuracha.domain.entity.ProfissionalEntity;
-import br.edu.fema.procuracha.domain.repository.FeedbackRepository;
-import br.edu.fema.procuracha.domain.repository.ProfissionalRepository;
+import br.edu.fema.procuracha.domain.entity.ServicoEntity;
+import br.edu.fema.procuracha.domain.repository.*;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/profissional")
@@ -18,34 +27,76 @@ public class ProfissionalController {
 
     private ProfissionalRepository profissionalRepository;
 
-    private ClienteController clienteController;
+    private CidadeRepository cidadeRepository;
+
+    private ClienteRepository clienteRepository;
+
+    private ServicoRepository servicoRepository;
+
+    private ServicoController servicoController;
 
     public ProfissionalController(ProfissionalRepository profissionalRepository,
-                                  ClienteController clienteController,
-                                  FeedbackRepository feedbackRepository) {
+                                  CidadeRepository cidadeRepository,
+                                  ClienteRepository clienteRepository,
+                                  FeedbackRepository feedbackRepository,
+                                  ServicoRepository servicoRepository,
+                                  ServicoController servicoController) {
         this.profissionalRepository = profissionalRepository;
-        this.clienteController = clienteController;
+        this.servicoController = servicoController;
         this.feedbackRepository = feedbackRepository;
+        this.clienteRepository = clienteRepository;
+        this.cidadeRepository = cidadeRepository;
+        this.servicoRepository = servicoRepository;
+
     }
 
     @GetMapping("/{id}")
-    public List<ProfissionalDTO> getClientes(@PathVariable Long id) {
+    public List<ProfissionalDTO> getProfissionais(@PathVariable Long id) {
         return ProfissionalDTO.converter(
                 this.profissionalRepository.findAllByIdNot(id),
                 this.feedbackRepository
         );
     }
 
-    @PostMapping("/logar")
-    public ProfissionalDTO logarCliente(@RequestBody @Valid ClienteForm clienteForm) {
-        ProfissionalEntity profissionalEntity = this.profissionalRepository.findByClienteEntity_Id(
-                this.clienteController.logarCliente(clienteForm).getId()
-        );
-        return new ProfissionalDTO(
-                profissionalEntity,
-                this.feedbackRepository.findAllByContratoEntity_ProfissionalEntity_Id(
-                        profissionalEntity.getId()
-                )
-        );
+    @GetMapping("/buscar/{cpf}")
+    public ProfissionalDTO buscarProfissional(@PathVariable String cpf) {
+        Optional<ProfissionalEntity> profissionalEntity = this.profissionalRepository.findByClienteEntity_Cpf(cpf);
+        if(!profissionalEntity.isEmpty()) {
+            return new ProfissionalDTO(
+                    profissionalEntity.get(),
+                    this.feedbackRepository.findAllByContratoEntity_ProfissionalEntity_Id(
+                            profissionalEntity.get().getId()
+                    )
+            );
+        }
+        return null;
+    }
+
+    @PostMapping("/salvar/servico")
+    public ProfissionalEntity addNewServicoToProfissional(@RequestBody ProfissionalForm profissionalForm) {
+        ProfissionalEntity profissional = postProfissional(profissionalForm.getClienteForm());
+
+        ServicoEntity novoServico = new ServicoEntity();
+        novoServico.setDescricao(profissionalForm.getServicoForm().getDescricao());
+
+        // Salvar o novo serviço no repositório
+        ServicoEntity servicoSalvo = this.servicoRepository.save(novoServico);
+
+        // Adicionar o novo serviço ao profissional
+        if (!profissional.getServicoEntities().contains(servicoSalvo)) {
+            profissional.getServicoEntities().add(servicoSalvo);
+        }
+
+        // Salvar as mudanças no profissional
+        return profissionalRepository.save(profissional);
+    }
+
+    public ProfissionalEntity postProfissional(ClienteForProfissionalForm clienteForm) {
+        return this.profissionalRepository.findByClienteEntity_Cpf(clienteForm.getCpf())
+                .orElseGet(() -> {
+                    ProfissionalEntity novoProfissional = new ProfissionalEntity();
+                    novoProfissional.setClienteEntity(this.clienteRepository.findByCpf(clienteForm.getCpf()).get());
+                    return this.profissionalRepository.save(novoProfissional);
+                });
     }
 }

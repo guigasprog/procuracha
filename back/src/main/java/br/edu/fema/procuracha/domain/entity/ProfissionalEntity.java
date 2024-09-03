@@ -16,11 +16,11 @@ public class ProfissionalEntity {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @OneToOne
+    @OneToOne(cascade = { CascadeType.ALL })
     @JoinColumn(name = "cliente_id")
     private ClienteEntity clienteEntity;
 
-    @ManyToMany
+    @ManyToMany(cascade = { CascadeType.ALL })
     @JoinTable(name="profissional_servicos",
             joinColumns= {@JoinColumn(name="profissional_id")},
             inverseJoinColumns= {@JoinColumn(name="servico_id")})

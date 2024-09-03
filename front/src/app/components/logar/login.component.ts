@@ -1,6 +1,10 @@
+import { ProfissionalService } from './../../shared/services/profissional.service';
+import { ClienteService } from './../../shared/services/cliente.service';
 import { Component } from '@angular/core';
 import { Cliente } from '../../shared/models/cliente.model';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { timeout } from 'rxjs';
 
 @Component({
   selector: 'LOGIN',
@@ -223,6 +227,12 @@ export class LogInComponent {
 
   reg: boolean = false;
 
+  constructor(
+    private clienteService: ClienteService,
+    private profissionalService: ProfissionalService,
+    private router: Router
+  ) {}
+
   clickou() {
     this.reg = !this.reg;
     this.login = new Cliente();
@@ -230,10 +240,30 @@ export class LogInComponent {
   }
 
   logar(login: Cliente) {
-    console.log(login);
+    this.clienteService.getClienteLogin(login).subscribe((success) => {
+      localStorage.clear();
+      localStorage.setItem('token', JSON.stringify(success));
+      this.profissionalService
+        .getProfissionais(success.id)
+        .subscribe((success) => {
+          localStorage.setItem('profissionais', JSON.stringify(success));
+        });
+      this.profissionalService
+        .getProfissional(success.cpf)
+        .subscribe((success) =>
+          this.profissionalService
+            .getProfissionais(success.id)
+            .subscribe((success) => {
+              localStorage.setItem('profissionais', JSON.stringify(success));
+            })
+        );
+      setTimeout(() => this.router.navigate(['']), 1000);
+    });
   }
 
   registrar(registro: Cliente) {
-    console.log(registro);
+    this.clienteService.postClienteRegistro(registro).subscribe((success) => {
+      this.logar(success);
+    });
   }
 }
