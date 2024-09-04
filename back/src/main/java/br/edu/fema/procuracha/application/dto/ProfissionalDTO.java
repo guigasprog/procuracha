@@ -36,7 +36,7 @@ public class ProfissionalDTO {
         this.cliente = new ClienteDTO(profissionalEntity.getClienteEntity());
         this.servicos = ServicoDTO.converterEntityForDTO(profissionalEntity.getServicoEntities());
         this.mediaFeedback = 0L;
-        if (feedbackEntity != null) {
+        if (!feedbackEntity.isEmpty()) {
             this.feedbacksProfissional = FeedbackProfissionalDTO.converterEntityForDto(feedbackEntity);
             this.feedbacksProfissional.stream()
                     .forEach(profissional -> this.mediaFeedback += profissional.getNota());

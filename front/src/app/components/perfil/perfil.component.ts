@@ -1,16 +1,24 @@
 import { Component, OnInit } from '@angular/core';
 import { Cliente } from '../../shared/models/cliente.model';
-import { FormsModule } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+} from '@angular/forms';
 import { Profissional } from '../../shared/models/profissional.model';
-import { ProfissionalService } from '../../shared/services/profissional.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProfissionalForm } from '../../shared/models/profissionalForm.form';
 import { Servico } from '../../shared/models/servico.model';
+import { Contrato } from '../../shared/models/contrato.model';
+import { ProfissionalService } from '../../shared/services/profissional.service';
+import { ContratoService } from '../../shared/services/contrato.service';
+import { ContratoForm } from '../../shared/models/contrato.form';
 
 @Component({
   selector: 'USER',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, ReactiveFormsModule],
   template: ` <div class="bg">
     <header class="center">
       <img
@@ -63,27 +71,59 @@ import { Servico } from '../../shared/models/servico.model';
         @if(!profissional || user.id! == profissional.cliente.id) {
         <h3 id="edit" (click)="editPerfil = true">Editar perfil</h3>
         } @else {
-        <button>Contratar</button>
+        <button (click)="contratacao = true">Contratar</button>
         }
       </div>
     </div>
     @if(profissional) {
-    <div class="feedbacks">
-      @for(feedback of profissional.feedbacksProfissional; track $index) {
-      <div class="card">
-        <div class="title">
-          <h6 style="margin: 0 0 0 5px; font-weight: 500">
-            {{ feedback.descricaoContrato }} • {{ feedback.nota }}/10
-          </h6>
+    <div
+      class="main"
+      style="width: 100%; height: auto; display: flex; padding: 3% 0;"
+    >
+      <div class="feedbacks">
+        <h1>FEEDBACK</h1>
+        @for(feedback of profissional.feedbacksProfissional; track $index) {
+        <div class="card">
+          <div class="title">
+            <h6 style="margin: 0 0 0 5px; font-weight: 500">
+              {{ feedback.descricaoContrato }} • {{ feedback.nota }}/10
+            </h6>
+          </div>
+          <div>
+            <h4 style="margin: 0 0 0 5px; font-weight: 500">
+              {{ feedback.descricao }}
+            </h4>
+          </div>
         </div>
-        <div>
-          <h4 style="margin: 0 0 0 5px; font-weight: 500">
-            {{ feedback.descricao }}
-          </h4>
+        }
+      </div>
+      @if(profissional.cliente.id == user.id) {
+      <div class="contratos">
+        <h1>CONTRATOS</h1>
+        @for(contrato of contratos; track $index) {
+        <div class="card">
+          <div class="title">
+            <h6 style="margin: 0 0 0 5px; font-weight: 500">
+              {{ contrato.descricao }} • {{ contrato.data }} •
+              {{ contrato.hora }}
+            </h6>
+          </div>
+          <div>
+            <h4 style="margin: 0 0 0 5px; font-weight: 500">
+              {{ contrato.cliente.nome }} • {{ contrato.cliente.email }}
+            </h4>
+            <h4 style="margin: 0 0 0 5px; font-weight: 500">
+              {{ contrato.cliente.cidade.nome }}/{{
+                contrato.cliente.cidade.uf
+              }}
+            </h4>
+          </div>
         </div>
+        }
       </div>
       }
     </div>
+
     }
     <div
       class="modal"
@@ -108,7 +148,7 @@ import { Servico } from '../../shared/models/servico.model';
           <button
             class="center"
             style="text-warp: warp; gap: 10px; background-color: #c45b52"
-            (click)="postService()"
+            (click)="postprofissionalService()"
           >
             <img
               src="img/icon/plus.png"
@@ -119,7 +159,7 @@ import { Servico } from '../../shared/models/servico.model';
           <button
             class="center"
             style="text-warp: warp; gap: 10px; background-color: #3c9966"
-            (click)="postService(formServico)"
+            (click)="postprofissionalService(formServico)"
           >
             <img
               src="img/icon/plus.png"
@@ -133,7 +173,7 @@ import { Servico } from '../../shared/models/servico.model';
         <button
           class="center"
           style="text-warp: warp; height: 80px; gap: 10px"
-          (click)="postService()"
+          (click)="postprofissionalService()"
         >
           <img
             src="img/icon/plus.png"
@@ -142,6 +182,61 @@ import { Servico } from '../../shared/models/servico.model';
           Adicionar Serviço
         </button>
         }
+      </div>
+    </div>
+
+    <div
+      class="modal"
+      style="{{
+        contratacao
+          ? 'opacity: 1; z-index: 5000;'
+          : 'opacity: 0; z-index: -5000;'
+      }}"
+    >
+      <div class="modal-content center">
+        <span class="close" (click)="contratacao = false">&times;</span>
+        <h1>CONTRATAR</h1>
+        <form class="center" [formGroup]="formulario">
+          <div>
+            <label for="data">Data:</label>
+            <input id="data" type="date" formControlName="data" />
+          </div>
+
+          <div>
+            <label for="hora">Hora:</label>
+            <input id="hora" type="time" formControlName="hora" />
+          </div>
+
+          <div>
+            <label for="descricao">Descrição:</label>
+            <input id="descricao" type="text" formControlName="descricao" />
+          </div>
+        </form>
+
+        <div class="center" style="gap: 30px;">
+          <button
+            class="center"
+            style="text-warp: warp; gap: 10px; background-color: #c45b52"
+            (click)="postprofissionalService()"
+          >
+            <img
+              src="img/icon/plus.png"
+              style="height: 70%; filter: invert(100%); rotate: 45deg"
+            />
+            CANCELAR
+          </button>
+          <button
+            class="center"
+            style="text-warp: warp; gap: 10px; background-color: #3c9966"
+            (click)="onSubmit()"
+          >
+            <img
+              src="img/icon/plus.png"
+              style="height: 70%; filter: invert(100%)"
+            />
+            CONTRATAR
+          </button>
+        </div>
       </div>
     </div>
   </div>`,
@@ -206,6 +301,18 @@ import { Servico } from '../../shared/models/servico.model';
         border-bottom: 2px solid #ffffff;
       }
     }
+    .contratos {
+      width: 45%;
+      padding: 3%;
+      border-left: 2px solid #ffffff;
+      .card {
+        width: 100%;
+        height: auto;
+        padding-top: 20px;
+        padding-bottom: 5px;
+        border-bottom: 2px solid #ffffff;
+      }
+    }
     .modal {
       transition: 1000ms;
       opacity: 0;
@@ -228,6 +335,37 @@ import { Servico } from '../../shared/models/servico.model';
         width: 80%;
         position: relative;
         overflow-y: auto;
+        form {
+          margin: 1%;
+          gap: 15px;
+          div {
+            display: flex;
+            flex-direction: column;
+            input[type="date"]{
+              background-color: #ffffff;
+              border: 2px solid #ffffff;
+              color: #000000;
+              padding: 0 10px;
+            }
+            input[type="time"]{
+              background-color: #ffffff;
+              border: 2px solid #ffffff;
+              color: #000000;
+              padding: 0 10px;
+            }
+            input{
+              background-color: #ffffff;
+              border: 2px solid #ffffff;
+              color: #000000;
+              padding: 0 10px;
+            }
+            label {
+              font-weight: 500;
+              margin: 0 0 0 10px;
+            }
+          }
+        }
+
       }
       .close {
         position: absolute;
@@ -258,12 +396,24 @@ export class PerfilComponent implements OnInit {
   forms: boolean = false;
   formServico: string = '';
   profissionalForm: ProfissionalForm = new ProfissionalForm();
+  contratacao: boolean = false;
+  contrato: ContratoForm = new ContratoForm();
+  formulario: FormGroup;
+  contratos: Array<Contrato> = [];
 
   constructor(
-    private service: ProfissionalService,
+    private profissionalService: ProfissionalService,
+    private contratoService: ContratoService,
     private router: Router,
-    private _route: ActivatedRoute
-  ) {}
+    private _route: ActivatedRoute,
+    private fb: FormBuilder
+  ) {
+    this.formulario = this.fb.group({
+      data: [new Date().toISOString().substring(0, 10)], // Inicializa com a data atual
+      hora: [new Date().toISOString().substring(11, 16)], // Inicializa com a hora atual
+      descricao: [''],
+    });
+  }
 
   ngOnInit(): void {
     if (localStorage.getItem(`token`) != null)
@@ -271,29 +421,55 @@ export class PerfilComponent implements OnInit {
     this._route.params.subscribe((params) => {
       this.getProfissional(params['cpf']);
     });
+    console.log(this.user.id + ' ' + this.profissional?.cliente.id);
+    if (this.profissional)
+      if (this.user.id == this.profissional?.cliente.id) this.getContratos();
   }
 
   getProfissional(cpf: string) {
-    this.service
+    this.profissionalService
       .getProfissional(cpf)
       .subscribe((success) => (this.profissional = success));
   }
 
-  postService(formServico?: string) {
+  getContratos() {
+    this.contratoService
+      .getContratosProfissional(this.user.id!)
+      .subscribe((success) => (this.contratos = success));
+  }
+
+  postprofissionalService(formServico?: string) {
     if (formServico != undefined) {
       this.profissionalForm.clienteForm = new Cliente();
       this.profissionalForm.clienteForm.cpf = this.user.cpf;
       this.profissionalForm.servicoForm = new Servico();
       this.profissionalForm.servicoForm.descricao = formServico;
-      this.service
+      this.profissionalService
         .postProfissional(this.profissionalForm)
-        .subscribe((success) =>
-            this.router.navigate(['/user', this.user.cpf])
-        );
+        .subscribe((success) => {
+          this.router
+            .navigateByUrl('/', { skipLocationChange: true })
+            .then(() => {
+              this.router.navigate(['/user', this.user.cpf]);
+            });
+        });
     } else {
       this.formServico = '';
       this.forms = !this.forms;
     }
+  }
+
+  onSubmit(): void {
+    this.contratacao = false;
+    let contrato: ContratoForm = new ContratoForm();
+    contrato.data = this.formulario.get('data')!.value;
+    contrato.hora = this.formulario.get('hora')!.value;
+    contrato.descricao = this.formulario.get('descricao')!.value;
+    contrato.idCliente = this.user.id!;
+    contrato.idProfissional = this.profissional!.id!;
+    this.contratoService
+      .postContrato(contrato)
+      .subscribe((success) => console.log(success));
   }
 
   voltarMenu() {

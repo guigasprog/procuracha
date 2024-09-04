@@ -15,6 +15,7 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -79,13 +80,18 @@ public class ProfissionalController {
         ServicoEntity novoServico = new ServicoEntity();
         novoServico.setDescricao(profissionalForm.getServicoForm().getDescricao());
 
-        // Salvar o novo serviço no repositório
         ServicoEntity servicoSalvo = this.servicoRepository.save(novoServico);
 
-        // Adicionar o novo serviço ao profissional
-        if (!profissional.getServicoEntities().contains(servicoSalvo)) {
+        if (profissional.getServicoEntities() == null) {
+            profissional.setServicoEntities(new ArrayList<>());
+        }
+
+        if (profissional.getServicoEntities().stream()
+                .noneMatch(servico -> servico.getDescricao().equalsIgnoreCase(servicoSalvo.getDescricao()))) {
             profissional.getServicoEntities().add(servicoSalvo);
         }
+
+
 
         // Salvar as mudanças no profissional
         return profissionalRepository.save(profissional);

@@ -263,7 +263,23 @@ export class LogInComponent {
 
   registrar(registro: Cliente) {
     this.clienteService.postClienteRegistro(registro).subscribe((success) => {
-      this.logar(success);
+      localStorage.clear();
+      localStorage.setItem('token', JSON.stringify(success));
+      this.profissionalService
+        .getProfissionais(success.id)
+        .subscribe((success) => {
+          localStorage.setItem('profissionais', JSON.stringify(success));
+        });
+      this.profissionalService
+        .getProfissional(success.cpf)
+        .subscribe((success) =>
+          this.profissionalService
+            .getProfissionais(success.id)
+            .subscribe((success) => {
+              localStorage.setItem('profissionais', JSON.stringify(success));
+            })
+        );
+      setTimeout(() => this.router.navigate(['']), 3000);
     });
   }
 }
