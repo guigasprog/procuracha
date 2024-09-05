@@ -1,3 +1,4 @@
+import { FeedbackService } from './../../shared/services/feedback.service';
 import { Component, OnInit } from '@angular/core';
 import { Cliente } from '../../shared/models/cliente.model';
 import {
@@ -14,11 +15,13 @@ import { Contrato } from '../../shared/models/contrato.model';
 import { ProfissionalService } from '../../shared/services/profissional.service';
 import { ContratoService } from '../../shared/services/contrato.service';
 import { ContratoForm } from '../../shared/models/contrato.form';
+import { DatePipe } from '@angular/common';
+import { Feedback } from '../../shared/models/feedback.model';
 
 @Component({
   selector: 'USER',
   standalone: true,
-  imports: [FormsModule, ReactiveFormsModule],
+  imports: [FormsModule, ReactiveFormsModule, DatePipe],
   template: ` <div class="bg">
     <header class="center">
       <img
@@ -75,7 +78,56 @@ import { ContratoForm } from '../../shared/models/contrato.form';
         }
       </div>
     </div>
-    @if(profissional) {
+    @if(profissional) { @if(feedbacks.length > 0) {
+    <div class="main center" style="width: 100%; height: auto; padding: 1% 0;">
+      <div
+        class="content center"
+        style="width: 80%; flex-direction: column; border-bottom: 2px solid #ffffff; padding: 1%;"
+      >
+        <h1>DEIXE SEU FEEDBACK AQUI APÓS O SERVIÇO</h1>
+        @for(feedback of feedbacks; track $index) {
+        <h2>{{ feedback.contratoEntity.descricao }}</h2>
+        <div
+          class="content center"
+          style="width: 80%; flex-direction: column; gap: 15px;"
+        >
+          <label for="resolvido" class="center" style="width: 100%"
+            ><input
+              type="checkbox"
+              name="resolvido"
+              [(ngModel)]="feedbackForm!.resolvido"
+              style="border-radius: 10px; width: 20px; height: 20px; margin-top: -2px"
+            />
+            Resolveu?
+          </label>
+          <label class="center" style="width: 100%; flex-direction: column;">
+            Descreva como foi o desempenho do profissional
+            <input
+              style="border: 2px solid #ffffff; color: #ffffff"
+              type="text"
+              [(ngModel)]="feedbackForm!.descricao"
+              placeholder="Ex: O corte de cabelo foi muito bom"
+            />
+          </label>
+          <label class="center" style="width: 100%; flex-direction: column;">
+            Que nota você daria?
+            <input
+              [(ngModel)]="feedbackForm!.nota"
+              style="border: 2px solid #ffffff; color: #ffffff"
+              type="number"
+            />
+          </label>
+          <button
+            style="background-color: #3c9966"
+            (click)="postFeedback(feedback)"
+          >
+            ENVIAR
+          </button>
+        </div>
+        }
+      </div>
+    </div>
+    }
     <div
       class="main"
       style="width: 100%; height: auto; display: flex; padding: 3% 0;"
@@ -102,11 +154,12 @@ import { ContratoForm } from '../../shared/models/contrato.form';
         <h1>CONTRATOS</h1>
         @for(contrato of contratos; track $index) {
         <div class="card">
-          <div class="title">
-            <h6 style="margin: 0 0 0 5px; font-weight: 500">
-              {{ contrato.descricao }} • {{ contrato.data }} •
+          <div>
+            <h2 style="margin: 0 0 0 5px; font-weight: 500">
+              {{ contrato.descricao }} •
+              {{ contrato.data | date : 'dd/MM/yyyy' }} •
               {{ contrato.hora }}
-            </h6>
+            </h2>
           </div>
           <div>
             <h4 style="margin: 0 0 0 5px; font-weight: 500">
@@ -117,6 +170,15 @@ import { ContratoForm } from '../../shared/models/contrato.form';
                 contrato.cliente.cidade.uf
               }}
             </h4>
+          </div>
+          <div class="center" style="width: 100%; padding: 5px;">
+            <button
+              class="center"
+              style="text-warp: warp; gap: 10px; background-color: #3c9966"
+              (click)="aceitarContrato(contrato.id!)"
+            >
+              ACEITAR
+            </button>
           </div>
         </div>
         }
@@ -400,10 +462,13 @@ export class PerfilComponent implements OnInit {
   contrato: ContratoForm = new ContratoForm();
   formulario: FormGroup;
   contratos: Array<Contrato> = [];
+  feedbacks: Array<Feedback> = [];
+  feedbackForm?: Feedback = new Feedback();
 
   constructor(
     private profissionalService: ProfissionalService,
     private contratoService: ContratoService,
+    private feedbackService: FeedbackService,
     private router: Router,
     private _route: ActivatedRoute,
     private fb: FormBuilder
@@ -421,21 +486,46 @@ export class PerfilComponent implements OnInit {
     this._route.params.subscribe((params) => {
       this.getProfissional(params['cpf']);
     });
-    console.log(this.user.id + ' ' + this.profissional?.cliente.id);
-    if (this.profissional)
-      if (this.user.id == this.profissional?.cliente.id) this.getContratos();
   }
 
   getProfissional(cpf: string) {
-    this.profissionalService
-      .getProfissional(cpf)
-      .subscribe((success) => (this.profissional = success));
+    this.profissionalService.getProfissional(cpf).subscribe((success) => {
+      this.profissional = success;
+      console.log(this.user.id + ' ' + this.profissional?.cliente.id);
+      if (this.profissional)
+        if (this.user.id == this.profissional?.cliente.id) {
+          this.getContratos();
+          this.getFeedback();
+        }
+    });
   }
 
   getContratos() {
     this.contratoService
       .getContratosProfissional(this.user.id!)
       .subscribe((success) => (this.contratos = success));
+  }
+
+  getFeedback() {
+    this.feedbackService
+      .getFeedback(this.profissional!.id!)
+      .subscribe((success) => {
+        this.feedbacks = success;
+        console.log(this.feedbacks);
+      });
+  }
+
+  postFeedback(feedback: Feedback) {
+    console.log(this.feedbackForm);
+    this.feedbackService
+      .postFeedback(feedback.id!, this.feedbackForm!)
+      .subscribe((success) =>
+        this.router
+          .navigateByUrl('/', { skipLocationChange: true })
+          .then(() => {
+            this.router.navigate(['/user', this.user.cpf]);
+          })
+      );
   }
 
   postprofissionalService(formServico?: string) {
@@ -457,6 +547,14 @@ export class PerfilComponent implements OnInit {
       this.formServico = '';
       this.forms = !this.forms;
     }
+  }
+
+  aceitarContrato(idContrato: number) {
+    this.feedbackService.aceitarFeedback(idContrato).subscribe((success) =>
+      this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
+        this.router.navigate(['/user', this.user.cpf]);
+      })
+    );
   }
 
   onSubmit(): void {

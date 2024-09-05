@@ -2,7 +2,9 @@ import { Profissional } from './profissional.model';
 import { Cliente } from './cliente.model';
 
 export class Contrato {
-  data!: string;
+  id?: number;
+
+  data!: Date;
 
   hora!: string;
 
