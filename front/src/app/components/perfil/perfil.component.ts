@@ -23,291 +23,284 @@ import { Feedback } from '../../shared/models/feedback.model';
   standalone: true,
   imports: [FormsModule, ReactiveFormsModule, DatePipe],
   template: ` <div class="bg">
-      <header class="center">
-        <img
-          src="img/icon/procuracha.png"
-          style="height: 100%; scale: 1.3; cursor: pointer"
-          (click)="voltarMenu()"
-        />
-        <div class="margin" style="width: 40%;"></div>
-        <input type="text" placeholder="PESQUISAR" list="profissionais" />
-      </header>
-      <div class="perfil center">
-        <div class="icon center">
-          <img src="img/icon/perfil.png" style="height: 70%;" />
-        </div>
-        <div class="dados">
-          <div class="title">
-            <h2 style="margin: 40px 0 0 0;">
-              @if(profissional) {
-              {{ profissional.cliente.nome }}
-              } @else {
-              {{ user.nome }}
-              }
-            </h2>
-          </div>
-          <div class="sub-title" style="height: 35%; width: 35%;">
+    <header class="center">
+      <img
+        src="img/icon/procuracha.png"
+        style="height: 100%; scale: 1.3; cursor: pointer"
+        (click)="voltarMenu()"
+      />
+      <div class="margin" style="width: 50%;"></div>
+    </header>
+    <div class="perfil center">
+      <div class="icon center">
+        <img src="img/icon/perfil.png" style="height: 70%;" />
+      </div>
+      <div class="dados">
+        <div class="title">
+          <h2 style="margin: 40px 0 0 0;">
             @if(profissional) {
-            <div class="servico" style="height: 100%; overflow-y: auto;">
-              @for (servico of profissional.servicos; track $index) {
-              <h5 style="margin: 5px 0 0 0; font-warp: warp">
-                {{ servico.descricao.toUpperCase() }}
-              </h5>
-              }
-            </div>
+            {{ profissional.cliente.nome }}
+            } @else {
+            {{ user.nome }}
             }
-
-            <h5 style="margin: 5px 0 0 0;">
-              @if(profissional) {
-              {{ profissional.cliente.cidade.nome.toUpperCase() }}
-              } @else {
-              {{ user.cidade.nome.toUpperCase() }}
-              } / @if(profissional) {
-              {{ profissional.cliente.cidade.uf.toUpperCase() }}
-              } @else {
-              {{ user.cidade.uf.toUpperCase() }}
-              }
-            </h5>
-          </div>
+          </h2>
         </div>
-        <div class="button center">
-          @if(!profissional || user.id! == profissional.cliente.id) {
-          <h3 id="edit" (click)="editPerfil = true">Editar perfil</h3>
-          } @else {
-          <button (click)="contratacao = true">Contratar</button>
+        <div class="sub-title" style="height: 35%; width: 35%;">
+          @if(profissional) {
+          <div class="servico" style="height: 100%; overflow-y: auto;">
+            @for (servico of profissional.servicos; track $index) {
+            <h5 style="margin: 5px 0 0 0; font-warp: warp">
+              {{ servico.descricao.toUpperCase() }}
+            </h5>
+            }
+          </div>
           }
+
+          <h5 style="margin: 5px 0 0 0;">
+            @if(profissional) {
+            {{ profissional.cliente.cidade.nome.toUpperCase() }}
+            } @else {
+            {{ user.cidade.nome.toUpperCase() }}
+            } / @if(profissional) {
+            {{ profissional.cliente.cidade.uf.toUpperCase() }}
+            } @else {
+            {{ user.cidade.uf.toUpperCase() }}
+            }
+          </h5>
         </div>
       </div>
-      @if(profissional) { @if(feedbacks.length > 0) {
+      <div class="button center">
+        @if(!profissional || user.id! == profissional.cliente.id) {
+        <h3 id="edit" (click)="editPerfil = true">Editar perfil</h3>
+        } @else {
+        <button (click)="contratacao = true">Contratar</button>
+        }
+      </div>
+    </div>
+    @if(profissional) { @if(feedbacks.length > 0) {
+    <div class="main center" style="width: 100%; height: auto; padding: 1% 0;">
       <div
-        class="main center"
-        style="width: 100%; height: auto; padding: 1% 0;"
+        class="content center"
+        style="width: 80%; flex-direction: column; border-bottom: 2px solid #ffffff; padding: 1%;"
       >
+        <h1>DEIXE SEU FEEDBACK AQUI APÓS O SERVIÇO</h1>
+        @for(feedback of feedbacks; track $index) {
+        <h2>{{ feedback.contratoEntity.descricao }}</h2>
         <div
           class="content center"
-          style="width: 80%; flex-direction: column; border-bottom: 2px solid #ffffff; padding: 1%;"
+          style="width: 80%; flex-direction: column; gap: 15px;"
         >
-          <h1>DEIXE SEU FEEDBACK AQUI APÓS O SERVIÇO</h1>
-          @for(feedback of feedbacks; track $index) {
-          <h2>{{ feedback.contratoEntity.descricao }}</h2>
-          <div
-            class="content center"
-            style="width: 80%; flex-direction: column; gap: 15px;"
+          <label for="resolvido" class="center" style="width: 100%"
+            ><input
+              type="checkbox"
+              name="resolvido"
+              [(ngModel)]="feedbackForm!.resolvido"
+              style="border-radius: 10px; width: 20px; height: 20px; margin-top: -2px"
+            />
+            Resolveu?
+          </label>
+          <label class="center" style="width: 100%; flex-direction: column;">
+            Descreva como foi o desempenho do profissional
+            <input
+              style="border: 2px solid #ffffff; color: #ffffff"
+              type="text"
+              [(ngModel)]="feedbackForm!.descricao"
+              placeholder="Ex: O corte de cabelo foi muito bom"
+            />
+          </label>
+          <label class="center" style="width: 100%; flex-direction: column;">
+            Que nota você daria?
+            <input
+              [(ngModel)]="feedbackForm!.nota"
+              style="border: 2px solid #ffffff; color: #ffffff"
+              type="number"
+            />
+          </label>
+          <button
+            style="background-color: #3c9966"
+            (click)="postFeedback(feedback)"
           >
-            <label for="resolvido" class="center" style="width: 100%"
-              ><input
-                type="checkbox"
-                name="resolvido"
-                [(ngModel)]="feedbackForm!.resolvido"
-                style="border-radius: 10px; width: 20px; height: 20px; margin-top: -2px"
-              />
-              Resolveu?
-            </label>
-            <label class="center" style="width: 100%; flex-direction: column;">
-              Descreva como foi o desempenho do profissional
-              <input
-                style="border: 2px solid #ffffff; color: #ffffff"
-                type="text"
-                [(ngModel)]="feedbackForm!.descricao"
-                placeholder="Ex: O corte de cabelo foi muito bom"
-              />
-            </label>
-            <label class="center" style="width: 100%; flex-direction: column;">
-              Que nota você daria?
-              <input
-                [(ngModel)]="feedbackForm!.nota"
-                style="border: 2px solid #ffffff; color: #ffffff"
-                type="number"
-              />
-            </label>
-            <button
-              style="background-color: #3c9966"
-              (click)="postFeedback(feedback)"
-            >
-              ENVIAR
-            </button>
-          </div>
-          }
-        </div>
-      </div>
-      }
-      <div
-        class="main"
-        style="width: 100%; height: auto; display: flex; padding: 3% 0;"
-      >
-        <div class="feedbacks">
-          <h1>FEEDBACK</h1>
-          @for(feedback of profissional.feedbacksProfissional; track $index) {
-          <div class="card">
-            <div class="title">
-              <h6 style="margin: 0 0 0 5px; font-weight: 500">
-                {{ feedback.descricaoContrato }} • {{ feedback.nota }}/10
-              </h6>
-            </div>
-            <div>
-              <h4 style="margin: 0 0 0 5px; font-weight: 500">
-                {{ feedback.descricao }}
-              </h4>
-            </div>
-          </div>
-          }
-        </div>
-        @if(profissional.cliente.id == user.id) {
-        <div class="contratos">
-          <h1>CONTRATOS</h1>
-          @for(contrato of contratos; track $index) {
-          <div class="card">
-            <div>
-              <h2 style="margin: 0 0 0 5px; font-weight: 500">
-                {{ contrato.descricao }} •
-                {{ contrato.data | date : 'dd/MM/yyyy' }} •
-                {{ contrato.hora }}
-              </h2>
-            </div>
-            <div>
-              <h4 style="margin: 0 0 0 5px; font-weight: 500">
-                {{ contrato.cliente.nome }} • {{ contrato.cliente.email }}
-              </h4>
-              <h4 style="margin: 0 0 0 5px; font-weight: 500">
-                {{ contrato.cliente.cidade.nome }}/{{
-                  contrato.cliente.cidade.uf
-                }}
-              </h4>
-            </div>
-            <div class="center" style="width: 100%; padding: 5px;">
-              <button
-                class="center"
-                style="text-warp: warp; gap: 10px; background-color: #3c9966"
-                (click)="aceitarContrato(contrato.id!)"
-              >
-                ACEITAR
-              </button>
-            </div>
-          </div>
-          }
+            ENVIAR
+          </button>
         </div>
         }
       </div>
-
-      }
-      <div
-        class="modal"
-        style="{{
-          editPerfil
-            ? 'opacity: 1; z-index: 5000;'
-            : 'opacity: 0; z-index: -5000;'
-        }}"
-      >
-        <div class="modal-content center">
-          <span class="close" (click)="editPerfil = false">&times;</span>
-          <h3>Adicione seus serviços, se for profissional.</h3>
-          @if(forms) {
-          <input
-            type="text"
-            [(ngModel)]="formServico"
-            placeholder="Informe o serviço"
-            style="margin-bottom: 10px; border: 2px solid #ffffff; color: #ffffff"
-          />
-          } @if(forms) {
-          <div class="center" style="gap: 30px;">
-            <button
-              class="center"
-              style="text-warp: warp; gap: 10px; background-color: #c45b52"
-              (click)="postprofissionalService()"
-            >
-              <img
-                src="img/icon/plus.png"
-                style="height: 70%; filter: invert(100%); rotate: 45deg"
-              />
-              CANCELAR
-            </button>
+    </div>
+    }
+    <div
+      class="main"
+      style="width: 100%; height: auto; display: flex; padding: 3% 0;"
+    >
+      <div class="feedbacks">
+        <h1>FEEDBACK</h1>
+        @for(feedback of profissional.feedbacksProfissional; track $index) {
+        <div class="card">
+          <div class="title">
+            <h6 style="margin: 0 0 0 5px; font-weight: 500">
+              {{ feedback.descricaoContrato }} • {{ feedback.nota }}/10
+            </h6>
+          </div>
+          <div>
+            <h4 style="margin: 0 0 0 5px; font-weight: 500">
+              {{ feedback.descricao }}
+            </h4>
+          </div>
+        </div>
+        }
+      </div>
+      @if(profissional.cliente.id == user.id) {
+      <div class="contratos">
+        <h1>CONTRATOS</h1>
+        @for(contrato of contratos; track $index) {
+        <div class="card">
+          <div>
+            <h2 style="margin: 0 0 0 5px; font-weight: 500">
+              {{ contrato.descricao }} •
+              {{ contrato.data | date : 'dd/MM/yyyy' }} •
+              {{ contrato.hora }}
+            </h2>
+          </div>
+          <div>
+            <h4 style="margin: 0 0 0 5px; font-weight: 500">
+              {{ contrato.cliente.nome }} • {{ contrato.cliente.email }}
+            </h4>
+            <h4 style="margin: 0 0 0 5px; font-weight: 500">
+              {{ contrato.cliente.cidade.nome }}/{{
+                contrato.cliente.cidade.uf
+              }}
+            </h4>
+          </div>
+          <div class="center" style="width: 100%; padding: 5px;">
             <button
               class="center"
               style="text-warp: warp; gap: 10px; background-color: #3c9966"
-              (click)="postprofissionalService(formServico)"
+              (click)="aceitarContrato(contrato.id!)"
             >
-              <img
-                src="img/icon/plus.png"
-                style="height: 70%; filter: invert(100%)"
-              />
-              ADICIONAR
+              ACEITAR
             </button>
           </div>
+        </div>
+        }
+      </div>
+      }
+    </div>
 
-          } @else {
+    }
+    <div
+      class="modal"
+      style="{{
+        editPerfil
+          ? 'opacity: 1; z-index: 5000;'
+          : 'opacity: 0; z-index: -5000;'
+      }}"
+    >
+      <div class="modal-content center">
+        <span class="close" (click)="editPerfil = false">&times;</span>
+        <h3>Adicione seus serviços, se for profissional.</h3>
+        @if(forms) {
+        <input
+          type="text"
+          [(ngModel)]="formServico"
+          placeholder="Informe o serviço"
+          style="margin-bottom: 10px; border: 2px solid #ffffff; color: #ffffff"
+        />
+        } @if(forms) {
+        <div class="center" style="gap: 30px;">
           <button
             class="center"
-            style="text-warp: warp; height: 80px; gap: 10px"
+            style="text-warp: warp; gap: 10px; background-color: #c45b52"
             (click)="postprofissionalService()"
           >
             <img
               src="img/icon/plus.png"
-              style="height: 50%; filter: invert(100%)"
+              style="height: 70%; filter: invert(100%); rotate: 45deg"
             />
-            Adicionar Serviço
+            CANCELAR
           </button>
-          }
+          <button
+            class="center"
+            style="text-warp: warp; gap: 10px; background-color: #3c9966"
+            (click)="postprofissionalService(formServico)"
+          >
+            <img
+              src="img/icon/plus.png"
+              style="height: 70%; filter: invert(100%)"
+            />
+            ADICIONAR
+          </button>
         </div>
+
+        } @else {
+        <button
+          class="center"
+          style="text-warp: warp; height: 80px; gap: 10px"
+          (click)="postprofissionalService()"
+        >
+          <img
+            src="img/icon/plus.png"
+            style="height: 50%; filter: invert(100%)"
+          />
+          Adicionar Serviço
+        </button>
+        }
       </div>
+    </div>
 
-      <div
-        class="modal"
-        style="{{
-          contratacao
-            ? 'opacity: 1; z-index: 5000;'
-            : 'opacity: 0; z-index: -5000;'
-        }}"
-      >
-        <div class="modal-content center">
-          <span class="close" (click)="contratacao = false">&times;</span>
-          <h1>CONTRATAR</h1>
-          <form class="center" [formGroup]="formulario">
-            <div>
-              <label for="data">Data:</label>
-              <input id="data" type="date" formControlName="data" />
-            </div>
-
-            <div>
-              <label for="hora">Hora:</label>
-              <input id="hora" type="time" formControlName="hora" />
-            </div>
-
-            <div>
-              <label for="descricao">Descrição:</label>
-              <input id="descricao" type="text" formControlName="descricao" />
-            </div>
-          </form>
-
-          <div class="center" style="gap: 30px;">
-            <button
-              class="center"
-              style="text-warp: warp; gap: 10px; background-color: #c45b52"
-              (click)="postprofissionalService()"
-            >
-              <img
-                src="img/icon/plus.png"
-                style="height: 70%; filter: invert(100%); rotate: 45deg"
-              />
-              CANCELAR
-            </button>
-            <button
-              class="center"
-              style="text-warp: warp; gap: 10px; background-color: #3c9966"
-              (click)="onSubmit()"
-            >
-              <img
-                src="img/icon/plus.png"
-                style="height: 70%; filter: invert(100%)"
-              />
-              CONTRATAR
-            </button>
+    <div
+      class="modal"
+      style="{{
+        contratacao
+          ? 'opacity: 1; z-index: 5000;'
+          : 'opacity: 0; z-index: -5000;'
+      }}"
+    >
+      <div class="modal-content center">
+        <span class="close" (click)="contratacao = false">&times;</span>
+        <h1>CONTRATAR</h1>
+        <form class="center" [formGroup]="formulario">
+          <div>
+            <label for="data">Data:</label>
+            <input id="data" type="date" formControlName="data" />
           </div>
+
+          <div>
+            <label for="hora">Hora:</label>
+            <input id="hora" type="time" formControlName="hora" />
+          </div>
+
+          <div>
+            <label for="descricao">Descrição:</label>
+            <input id="descricao" type="text" formControlName="descricao" />
+          </div>
+        </form>
+
+        <div class="center" style="gap: 30px;">
+          <button
+            class="center"
+            style="text-warp: warp; gap: 10px; background-color: #c45b52"
+            (click)="postprofissionalService()"
+          >
+            <img
+              src="img/icon/plus.png"
+              style="height: 70%; filter: invert(100%); rotate: 45deg"
+            />
+            CANCELAR
+          </button>
+          <button
+            class="center"
+            style="text-warp: warp; gap: 10px; background-color: #3c9966"
+            (click)="onSubmit()"
+          >
+            <img
+              src="img/icon/plus.png"
+              style="height: 70%; filter: invert(100%)"
+            />
+            CONTRATAR
+          </button>
         </div>
       </div>
     </div>
-    @for(profissional of profissionais; track $index){
-    <option value="{{ profissional.cliente.nome }}"></option>
-    }`,
+  </div>`,
   styles: `
   .bg {
     overflow: hidden;
