@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface FeedbackRepository extends JpaRepository<FeedbackEntity, Long> {
 
@@ -14,7 +15,7 @@ public interface FeedbackRepository extends JpaRepository<FeedbackEntity, Long> 
             Long id, Long nota, String descricao
     );
 
-    FeedbackEntity findByContratoEntity_Id(Long id);
+    Optional<FeedbackEntity> findByContratoEntity_Id(Long id);
 
     List<FeedbackEntity> findAllByContratoEntity_ProfissionalEntity_Id(Long id);
 

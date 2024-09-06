@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -43,10 +44,10 @@ public class ContratoController {
         if(!contratoDTO.isEmpty()) {
             contratoDTO = contratoDTO.stream()
                     .filter(contrato -> {
-                        FeedbackEntity feedback = this.feedbackRepository
+                        Optional<FeedbackEntity> feedback = this.feedbackRepository
                                 .findByContratoEntity_Id(contrato.getId());
-                        return feedback == null &&
-                                contrato.getData().isAfter(LocalDate.now());
+                        return feedback.isEmpty() &&
+                                contrato.getData().isAfter(LocalDate.now().minusDays(1));
                     })
                     .toList();
         }

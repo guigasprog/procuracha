@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Profissional } from '../../shared/models/profissional.model';
 import { Router, RouterLink } from '@angular/router';
 import { Cliente } from '../../shared/models/cliente.model';
@@ -7,133 +7,159 @@ import { Cliente } from '../../shared/models/cliente.model';
 @Component({
   selector: 'MENU',
   standalone: true,
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, ReactiveFormsModule],
   template: ` <div class="bg">
-    <header class="center">
-      <div class="logo center" style="width: 30%; height: 100%;">
-        <img src="img/icon/procuracha.png" style="height: 100%; scale: 1.3;" />
-      </div>
+      <header class="center">
+        <div class="logo center" style="width: 30%; height: 100%;">
+          <img
+            src="img/icon/procuracha.png"
+            style="height: 100%; scale: 1.3;"
+          />
+        </div>
 
-      <div class="margin" style="width: 10%;"></div>
-      <input type="text" placeholder="PESQUISAR" />
-      <div
-        class="user center"
-        style="height: 100%; width: 25%; justify-content: end;"
+        <div class="margin" style="width: 10%;"></div>
+        <input
+          type="text"
+          [formControl]="filter"
+          placeholder="PESQUISAR"
+          list="profissionais"
+        />
+        <div
+          class="user center"
+          style="height: 100%; width: 25%; justify-content: end;"
+        >
+          <img src="img/icon/perfil.png" style="height: 100%; scale: 0.6" />
+          <div class="edit" style="width: 50%">
+            <h3 style="font-size: 23px; margin: 0 0 3px 0; text-wrap: wrap;">
+              {{ user.nome }}
+            </h3>
+            <div
+              class="opcoes center"
+              style="width: 100%; gap: 20px; justify-content: start"
+            >
+              <h4
+                (click)="perfil(user.cpf)"
+                style="font-weight: 500; font-size: 13px; margin: 0 0 0 0; cursor: pointer"
+              >
+                Perfil
+              </h4>
+              <h4
+                (click)="limparToken()"
+                style="font-weight: 500; font-size: 13px; margin: 0 0 0 0; cursor: pointer"
+              >
+                Logout
+              </h4>
+            </div>
+          </div>
+        </div>
+      </header>
+      <header
+        class="center"
+        style="gap: 10px; background-color: transparent; border-bottom: 2px solid #ffffff"
       >
-        <img src="img/icon/perfil.png" style="height: 100%; scale: 0.6" />
-        <div class="edit" style="width: 50%">
-          <h3 style="font-size: 23px; margin: 0 0 3px 0; text-wrap: wrap;">
-            {{ user.nome }}
-          </h3>
-          <div class="opcoes center" style="width: 100%; gap: 20px; justify-content: start">
-            <h4
-              (click)="perfil(user.cpf)"
-              style="font-weight: 500; font-size: 13px; margin: 0 0 0 0; cursor: pointer"
-            >
-              Perfil
-            </h4>
-            <h4
-              (click)="limparToken()"
-              style="font-weight: 500; font-size: 13px; margin: 0 0 0 0; cursor: pointer"
-            >
-              Logout
-            </h4>
-          </div>
-
-        </div>
-      </div>
-    </header>
-    <header
-      class="center"
-      style="gap: 10px; background-color: transparent; border-bottom: 2px solid #ffffff"
-    >
-      <input
-        type="text"
-        placeholder="UF"
-        style="width: 5%"
-        maxlength="2"
-        [(ngModel)]="uf"
-        (change)="aplicarFiltro()"
-      />
-      <input
-        type="text"
-        placeholder="CIDADE"
-        style="width: 15%"
-        [(ngModel)]="cid"
-        (change)="aplicarFiltro()"
-      />
-      <input
-        type="text"
-        placeholder="FUNÇÃO"
-        style="width: 15%"
-        [(ngModel)]="func"
-        (change)="aplicarFiltro()"
-      />
-      <input
-        type="number"
-        placeholder="RELEVANCIA"
-        style="width: 15%"
-        min="0"
-        max="10"
-        [(ngModel)]="rev"
-        (change)="aplicarFiltro()"
-      />
-      <div class="margin" style="width: 35%;"></div>
-    </header>
-    <main>
-      <div class="feedback">
-        @if(profissionais) { @for(profissional of profissionais; track $index) {
-        <div class="feedbacks">
-          <div
-            (click)="perfil(profissional.cliente.cpf)"
-            class="card"
-            style=" cursor: pointer;
+        <input
+          type="text"
+          placeholder="UF"
+          style="width: 5%"
+          maxlength="2"
+          [(ngModel)]="uf"
+          (change)="aplicarFiltro()"
+        />
+        <input
+          type="text"
+          placeholder="CIDADE"
+          style="width: 15%"
+          [(ngModel)]="cid"
+          (change)="aplicarFiltro()"
+        />
+        <input
+          type="text"
+          placeholder="FUNÇÃO"
+          style="width: 15%"
+          [(ngModel)]="func"
+          (change)="aplicarFiltro()"
+        />
+        <input
+          type="number"
+          placeholder="RELEVANCIA"
+          style="width: 15%"
+          min="0"
+          max="10"
+          [(ngModel)]="rev"
+          (change)="aplicarFiltro()"
+        />
+        <div class="margin" style="width: 35%;"></div>
+      </header>
+      <main>
+        <div class="feedback">
+          @if(profissionais) { @for(profissional of profissionais; track $index)
+          {
+          <div class="feedbacks">
+            <div
+              (click)="perfil(profissional.cliente.cpf)"
+              class="card"
+              style=" cursor: pointer;
         padding: 2%;"
-          >
-            <h2 style="margin: 0">
-              {{ profissional.cliente.nome }} •
-              {{ profissional.cliente.cidade.nome }}/{{
-                profissional.cliente.cidade.uf
-              }}
-              • {{ profissional.mediaFeedback }}/10
-            </h2>
-            @for(feedback of profissional.feedbacksProfissional; track $index) {
-            @if(feedback.resolvido) {
-            <p style="margin: 10px 0 10px 0;">
-              {{ feedback.descricaoContrato }} • {{ feedback.nota }}/10
-            </p>
-            } }
+            >
+              <h2 style="margin: 0">
+                {{ profissional.cliente.nome }} •
+                {{ profissional.cliente.cidade.nome }}/{{
+                  profissional.cliente.cidade.uf
+                }}
+                • {{ profissional.mediaFeedback }}/10
+              </h2>
+              @for(feedback of profissional.feedbacksProfissional; track $index)
+              { @if(feedback.resolvido) {
+              <p style="margin: 10px 0 10px 0;">
+                {{ feedback.descricaoContrato }} • {{ feedback.nota }}/10
+              </p>
+              } }
+            </div>
           </div>
+          } }
         </div>
-        } }
-      </div>
 
-      <div class="maiorRelevancia">
-        <div class="card">
-          <div
-            class="dados"
-            style="cursor: pointer"
-            (click)="perfil(profissionalMaisRelevante.cliente.cpf)"
-          >
-            <h1 style="margin: 0">Mais Relevante</h1>
-            <h2>
-              {{ profissionalMaisRelevante.cliente.nome }} •
-              {{ profissionalMaisRelevante.cliente.cidade.nome }}/{{
-                profissionalMaisRelevante.cliente.cidade.uf
-              }}
-              • {{ profissionalMaisRelevante.mediaFeedback }}/10
-            </h2>
-            @for(feedback of profissionalMaisRelevante.feedbacksProfissional;
-            track $index) { @if(feedback.resolvido) {
-            <p style="margin: 0 0 15px 0;">
-              {{ feedback.descricaoContrato }} • {{ feedback.nota }}/10
-            </p>
-            } }
+        <div class="maiorRelevancia">
+          <div class="card">
+            <div
+              class="dados"
+              style="cursor: pointer"
+              (click)="perfil(profissionalMaisRelevante.cliente.cpf)"
+            >
+              <h1 style="margin: 0">Mais Relevante</h1>
+              <h2>
+                {{ profissionalMaisRelevante.cliente.nome }} •
+                {{ profissionalMaisRelevante.cliente.cidade.nome }}/{{
+                  profissionalMaisRelevante.cliente.cidade.uf
+                }}
+                • {{ profissionalMaisRelevante.mediaFeedback }}/10
+              </h2>
+              @for(feedback of profissionalMaisRelevante.feedbacksProfissional;
+              track $index) { @if(feedback.resolvido) {
+              <p style="margin: 0 0 15px 0;">
+                {{ feedback.descricaoContrato }} • {{ feedback.nota }}/10
+              </p>
+              } }
+            </div>
           </div>
         </div>
-      </div>
-    </main>
-  </div>`,
+      </main>
+    </div>
+    <datalist id="profissionais">
+      @for(profissional of profissionais; track $index){
+      <option
+        [value]="
+          profissional.cliente.nome +
+          ' • ' +
+          profissional.cliente.cidade.nome +
+          '/' +
+          profissional.cliente.cidade.uf +
+          ' • ' +
+          profissional.servicos[0].descricao
+        "
+      ></option>
+      }
+    </datalist>`,
   styles: `
   .bg {
     overflow: hidden;
@@ -212,11 +238,15 @@ export class MenuComponent implements OnInit {
   func?: string;
   rev?: number;
 
+  filter = new FormControl('');
+
   constructor(private router: Router) {}
 
   ngOnInit(): void {
-    if(localStorage.getItem('profissionais')) {
-      this.rawProfissionais = JSON.parse(localStorage.getItem('profissionais')!);
+    if (localStorage.getItem('profissionais')) {
+      this.rawProfissionais = JSON.parse(
+        localStorage.getItem('profissionais')!
+      );
       console.log(this.rawProfissionais);
       this.profissionais = this.rawProfissionais;
       this.user = JSON.parse(localStorage.getItem('token')!);
@@ -240,8 +270,10 @@ export class MenuComponent implements OnInit {
           }
           return maisRelevante;
         }, null as any);
-    } else
-    this.router.navigate(['/login']);
+    } else this.router.navigate(['/login']);
+    this.filter.valueChanges.subscribe((value) => {
+      this.aplicarFiltros({ todos: value });
+    });
   }
 
   aplicarFiltro() {
@@ -258,6 +290,7 @@ export class MenuComponent implements OnInit {
     cidade?: string;
     funcao?: string;
     relevancia?: number;
+    todos?: any;
   }) {
     this.profissionais = this.rawProfissionais.filter((prof) => {
       const ufMatches = filtros.uf
@@ -265,11 +298,13 @@ export class MenuComponent implements OnInit {
             .toLowerCase()
             .includes(filtros.uf.toLowerCase())
         : true;
+
       const cidadeMatches = filtros.cidade
         ? prof.cliente.cidade.nome
             .toLowerCase()
             .includes(filtros.cidade.toLowerCase())
         : true;
+
       const funcaoMatches = filtros.funcao
         ? prof.servicos.some((servico) =>
             servico.descricao
@@ -277,12 +312,29 @@ export class MenuComponent implements OnInit {
               .includes(filtros.funcao?.toLowerCase() ?? '')
           )
         : true;
+
       const relevanciaMatches =
         filtros.relevancia !== undefined
           ? prof.mediaFeedback === filtros.relevancia
           : true;
 
-      return ufMatches && cidadeMatches && funcaoMatches && relevanciaMatches;
+      const formattedString = `${prof.cliente.nome} • ${
+        prof.cliente.cidade.nome
+      }/${prof.cliente.cidade.uf} • ${prof.servicos
+        .map((s) => s.descricao)
+        .join(', ')}`;
+
+      const todosMatches = filtros.todos
+        ? formattedString.toLowerCase().includes(filtros.todos.toLowerCase())
+        : true;
+
+      return (
+        ufMatches &&
+        cidadeMatches &&
+        funcaoMatches &&
+        relevanciaMatches &&
+        todosMatches
+      );
     });
   }
 
@@ -291,7 +343,7 @@ export class MenuComponent implements OnInit {
   }
 
   limparToken() {
-    localStorage.clear()
-    this.ngOnInit()
+    localStorage.clear();
+    this.ngOnInit();
   }
 }
