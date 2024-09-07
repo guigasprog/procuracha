@@ -77,7 +77,7 @@ import { Feedback } from '../../shared/models/feedback.model';
         }
       </div>
     </div>
-    @if(profissional) { @if(feedbacks.length > 0) {
+    @if(feedbacks.length > 0) {
     <div class="main center" style="width: 100%; height: auto; padding: 1% 0;">
       <div
         class="content center"
@@ -126,7 +126,7 @@ import { Feedback } from '../../shared/models/feedback.model';
         }
       </div>
     </div>
-    }
+    }@if(profissional) { 
     <div
       class="main"
       style="width: 100%; height: auto; display: flex; padding: 3% 0;"
@@ -492,11 +492,12 @@ export class PerfilComponent implements OnInit {
   getProfissional(cpf: string) {
     this.profissionalService.getProfissional(cpf).subscribe((success) => {
       this.profissional = success;
-      console.log(this.user.id + ' ' + this.profissional?.cliente.id);
+	if(this.profissional?.cliente.id == undefined)  
+		this.getFeedback();
       if (this.profissional)
         if (this.user.id == this.profissional?.cliente.id) {
           this.getContratos();
-          this.getFeedback();
+this.getFeedback();
         }
     });
   }
@@ -509,7 +510,7 @@ export class PerfilComponent implements OnInit {
 
   getFeedback() {
     this.feedbackService
-      .getFeedback(this.profissional!.id!)
+      .getFeedback(this.user!.id!)
       .subscribe((success) => {
         this.feedbacks = success;
         console.log(this.feedbacks);
